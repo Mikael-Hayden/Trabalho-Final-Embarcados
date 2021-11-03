@@ -1,0 +1,157 @@
+#include <Keypad.h>
+#include <LiquidCrystal.h>
+#include <Servo.h>
+#include <string.h>
+
+LiquidCrystal lcd(A0,A1,A2,A3,A4,A5);
+
+const byte LINHAS = 4;
+const byte COLUNAS = 4;
+
+char digitos[LINHAS][COLUNAS] = {
+{'1','2','3','A'},
+{'4','5','6','B'},
+{'7','8','9','C'},
+{'*','0','#','D'}};
+
+byte pinosLinha[LINHAS] = { 11,10,9,8 }; 
+byte pinosColuna[COLUNAS] = { 7,6,5,4 }; 
+
+Keypad customKeypad = Keypad( makeKeymap(digitos), pinosLinha, pinosColuna, LINHAS, COLUNAS );
+
+char tecla;
+
+char pass[]={"0000"};
+int tam=strlen(pass);
+int posicao=0;
+int contador=0;
+
+int ult=2;
+int buzz=12;
+Servo servo1;
+
+void setup()
+{	
+	lcd.begin(16, 2);
+	servo1.attach(3);
+	Serial.begin(9600);
+	pinMode(buzz,OUTPUT);
+  	pinMode(13, INPUT);
+}
+
+
+void loop()
+{
+  
+  servo1.write(0);
+  tecla = customKeypad.getKey();
+  lcd.setCursor(0,0);
+  lcd.print("Digite sua senha");
+  
+  //Botão para simular a abertura interna da fechadura
+  
+  if (digitalRead(13) == 1)
+  {
+    Serial.println("Senha correta");
+    lcd.setCursor(0,0);
+    lcd.print("Acesso permitido");
+    lcd.setCursor(0,1);
+    lcd.print("                ");
+    contador=0;
+    posicao=0;
+ 	abrir();
+  }
+  
+  switch(tecla) 
+  {
+  case '0' ... '9':
+    if(tecla==pass[posicao])contador++;
+    Buzzer(100,50);
+  	lcd.setCursor(posicao,1);
+    lcd.print(tecla);
+    posicao++;
+    Serial.print(tecla);
+    break;
+  case '*':
+    contador=0;
+    lcd.setCursor(0,1);
+    lcd.print("                ");
+    posicao=0;
+    Serial.print("Clear");
+    break;
+  }
+  //Quando digitar todos os numeros	
+  if(posicao==tam){
+    Serial.println();
+    //Senha correta
+    if(contador==tam){
+      	Serial.println("Senha correta");
+      	lcd.setCursor(0,0);
+      	lcd.print("Acesso permitido");
+       	lcd.setCursor(0,1);
+      	lcd.print("                ");
+      	contador=0;
+      	posicao=0;
+      	abrir();
+    }
+    //Senha incorreta
+    else{
+      	Serial.println("Senha incorreta");
+    	lcd.setCursor(0,0);
+      	lcd.print("      Erro      ");
+        lcd.setCursor(0,1);
+      	lcd.print("                ");
+      	posicao=0;
+    	delay(2000);
+      	contador=0;
+    	lcd.setCursor(0,0);
+      	lcd.print("                ");
+       	delay(1000);
+    }
+  }
+}
+
+//Abertura do motor e medição com ultrassonico
+void abrir(){
+	servo1.write(100);
+  	Buzzer(255,100);
+  	Buzzer(255,100);
+  	bool abriu=true;
+  	while(abriu){
+    	servo1.write(100);
+      	int dist = leituraUS();
+      	if(dist<20){
+      		abriu=false;
+          	Serial.println("Abriu");
+            delay(5000);
+        }
+      	delay(10);
+  
+  }
+	Serial.println("Fechou");
+    servo1.write(0);
+  	Buzzer(255,100);
+  	Buzzer(255,100);
+}
+
+//Leitura Ultrassonico
+long leituraUS()
+{
+ 	pinMode(2, OUTPUT);
+  	digitalWrite(2, 0);
+    delayMicroseconds(2);
+    digitalWrite(2, 1);
+    delayMicroseconds(10);
+    digitalWrite(2, 0);
+    pinMode(2, INPUT);
+  
+  return 0.01723 *pulseIn(2,1);
+}
+
+//Som do buzzer
+void Buzzer(int som,int tempo){
+	analogWrite(buzz,som);
+  	delay(tempo);
+  	analogWrite(buzz,0);
+
+ }

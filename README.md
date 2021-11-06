@@ -1,6 +1,6 @@
 ## Trabalho Final Embarcados
 > Implementação da Fechadura Inteligente.
-> [Documento atualizado](https://docs.google.com/document/d/1N9oXhrAQg2YCxVvV03idlzwFfrHXuIplNMP_fZbrEIE/edit#)
+#### Acesso a Documentação atualizada [aqui](https://docs.google.com/document/d/1N9oXhrAQg2YCxVvV03idlzwFfrHXuIplNMP_fZbrEIE/edit#)
 ## Integrantes da Equipe:
 + Conceição Neves Silva - 21952453
 + Filipe Dias Brandão - 21952137
